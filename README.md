@@ -1,6 +1,6 @@
 # Extras in this fork
 
-Accompanying blog post: [Batching picoGPT](https://firozshaik.com/writing/01-batching.html)
+Accompanying blog post: [Batching picoGPT](https://firozshaik.com/writing/inference/01-batching/index.html)
 
 > For the original picoGPT project and its documentation, see [PicoGPT](#picogpt) below.
 
