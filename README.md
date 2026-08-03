@@ -1,7 +1,58 @@
+# Extras in this fork
+
+Accompanying blog post: [Batching picoGPT](https://firozshaik.com/writing/01-batching.html)
+
+> For the original picoGPT project and its documentation, see [PicoGPT](#picogpt) below.
+
+Two files have been added on top of the upstream picoGPT:
+
+* `gpt2_v1_batching.py` — a **batched / vectorized** rewrite of `gpt2.py`. It
+  adds a leading batch axis (`[B, T]`) and vectorizes the attention heads
+  (`[B, H, T, d_head]`) so multiple prompts run through the forward pass at
+  once, instead of one sequence at a time. Generation is still greedy
+  (`argmax`).
+* `test_gpt2.py` — a `pytest` that checks the batched implementation produces
+  the **same logits** as the original `gpt2.py` on random weights.
+
+## Running the batched model
+
+Single prompt (wrap it in quotes):
+
+```bash
+python gpt2_v1_batching.py "Alan Turing theorized that computers would one day become"
+```
+
+Multiple prompts in one batch — pass several quoted strings:
+
+```bash
+python gpt2_v1_batching.py \
+    "Alan Turing theorized that computers would one day become" \
+    "The quick brown fox jumps over the" \
+    --n_tokens_to_generate 20
+```
+
+Flags mirror `gpt2.py`: `--n_tokens_to_generate`, `--model_size`
+(`["124M", "355M", "774M", "1558M"]`), and `--models_dir`.
+
+> **Note:** prompts in a single batch must currently tokenize to the **same
+> length**, because they are stacked into one `np.array([...])` with no
+> padding. Mixed-length batching (left-padding + attention mask) is a natural
+> next step.
+
+## Running the tests
+
+```bash
+pip install pytest          # already included in requirements.txt
+python -m pytest test_gpt2.py -v
+```
+
+The test builds a tiny random model (`n_vocab=17, n_embd=12, n_head=3`) and
+asserts `gpt2_v1_batching.gpt2(...)` matches `gpt2.gpt2(...)` to within
+`rtol=atol=1e-12`, so the batching refactor is verified to be numerically
+equivalent to the reference implementation.
+
 # PicoGPT
 Accompanying blog post: [GPT in 60 Lines of Numpy](https://jaykmody.com/blog/gpt-from-scratch/)
-
----
 
 You've seen [openai/gpt-2](https://github.com/openai/gpt-2).
 
